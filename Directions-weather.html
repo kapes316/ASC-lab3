@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Directions service</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            height: 100%;
+        }
+
+        #floating-panel {
+            position: absolute;
+            top: 10px;
+            left: 5%;
+            z-index: 5;
+            background-color: #f0f0;
+            padding: 5px;
+            border: 1px solid #999;
+            text-align: center;
+            font-family: 'Roboto','sans-serif';
+            line-height: 30px;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+        <div id="floating-panel">
+            <b>PRESENT LOCATION: </b>
+            <input type="text" id="txt_src" />
+            <br />
+            <b>DESTINATION:   </b>
+            <input type="text" id="txt_dst" />
+            <br />
+            <input type="button" value="Get Directions" id="btn_directions"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" value="Get Weather" id="btn_weather" onclick="getweather()" />
+        </div>
+        <div id="map"></div>
+    <script>
+
+        function getweather()
+        {
+            var src = document.getElementById('txt_src').value;
+            var dst = document.getElementById('txt_dst').value;
+            var data1 = httpGet('http://api.openweathermap.org/data/2.5/weather?q=' + src);
+            alert('Source weather Json Data'+ data1);
+
+            var data2 = httpGet('http://api.openweathermap.org/data/2.5/weather?q=' + dst);
+            alert('Destination weather Json Data' + data2);
+        }
+        function httpGet(theUrl) {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", theUrl, false); // false for synchronous request
+            xmlHttp.send(null);
+            return xmlHttp.responseText;
+        }
+
+        function initMap() {
+            var directionsService = new google.maps.DirectionsService;
+            var directionsDisplay = new google.maps.DirectionsRenderer;
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 7,
+                center: { lat: 41.85, lng: -87.65 }
+            });
+            directionsDisplay.setMap(map);
+
+            var element = document.getElementById("btn_directions");
+            element.onclick = function () {
+                calculateAndDisplayRoute(directionsService, directionsDisplay);
+            };
+        }
+
+        function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+            directionsService.route({
+                origin: document.getElementById('txt_src').value,
+                destination: document.getElementById('txt_dst').value,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, function (response, status) {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    directionsDisplay.setDirections(response);
+                } else {
+                    window.alert('Directions request failed due to ' + status);
+                }
+            });
+        }
+
+    </script>
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBEc5oKIsEotuQ314jvziYjWI9ELztqIO4&signed_in=true&callback=initMap"></script>
+</body>
+</html>
+
+
+
+
+
